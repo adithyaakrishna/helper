@@ -117,12 +117,12 @@ export function SavedReplyForm({ savedReply, onSuccess, onCancel, onDelete }: Sa
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+      <form onSubmit={form.handleSubmit(onSubmit)} className="flex flex-col gap-6">
         <FormField
           control={form.control}
           name="name"
           render={({ field }) => (
-            <FormItem>
+            <FormItem className="flex-none">
               <FormLabel>Title</FormLabel>
               <FormControl>
                 <Input placeholder="e.g., Welcome Message" {...field} />
@@ -136,31 +136,33 @@ export function SavedReplyForm({ savedReply, onSuccess, onCancel, onDelete }: Sa
           control={form.control}
           name="content"
           render={() => (
-            <FormItem>
+            <FormItem className="flex-1 flex flex-col min-h-[300px]">
               <FormLabel>Content</FormLabel>
-              <FormControl>
-                <TipTapEditor
-                  ref={editorRef}
-                  className="min-h-48 max-h-96"
-                  ariaLabel="Saved reply content editor"
-                  placeholder="Enter your saved reply content here..."
-                  defaultContent={initialContentObject}
-                  editable={true}
-                  onUpdate={handleEditorUpdate}
-                  enableImageUpload={false}
-                  enableFileUpload={false}
-                  isRecordingSupported={isRecordingSupported}
-                  isRecording={isRecording}
-                  startRecording={startRecording}
-                  stopRecording={stopRecording}
-                />
-              </FormControl>
-              <FormMessage />
+              <div className="flex-1 flex flex-col">
+                <FormControl>
+                  <TipTapEditor
+                    ref={editorRef}
+                    className="flex-1"
+                    ariaLabel="Saved reply content editor"
+                    placeholder="Enter your saved reply content here..."
+                    defaultContent={initialContentObject}
+                    editable={true}
+                    onUpdate={handleEditorUpdate}
+                    enableImageUpload={false}
+                    enableFileUpload={false}
+                    isRecordingSupported={isRecordingSupported}
+                    isRecording={isRecording}
+                    startRecording={startRecording}
+                    stopRecording={stopRecording}
+                  />
+                </FormControl>
+                <FormMessage className="h-6 flex items-center" />
+              </div>
             </FormItem>
           )}
         />
 
-        <div className="flex items-center">
+        <div className="flex items-center flex-none">
           {savedReply && onDelete ? (
             <ConfirmationDialog
               message={`Are you sure you want to delete ${savedReply.name}? This action cannot be undone.`}

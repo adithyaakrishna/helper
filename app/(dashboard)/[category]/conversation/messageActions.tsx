@@ -318,7 +318,7 @@ export const MessageActions = () => {
               </button>
             )}
             <button
-              className="text-xs px-2 py-1 text-white underline hover:no-underline"
+              className="text-xs py-1 text-white underline hover:no-underline"
               onClick={() => {
                 setLastSentMessageId(emailId);
                 setShowKnowledgeBankDialog(true);

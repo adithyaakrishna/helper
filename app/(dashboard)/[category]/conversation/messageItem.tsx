@@ -96,7 +96,7 @@ const MessageItem = ({
 
   const messageLabels: JSX.Element[] = [];
   messageLabels.push(
-    <span key={`${message.id}-from`} className="flex items-center gap-1">
+    <span key={`${message.id}-from`} className="flex items-center gap-1 whitespace-nowrap">
       {userMessage ? (
         conversation.source === "email" ? (
           <Mail className="h-3 w-3" />
@@ -115,18 +115,18 @@ const MessageItem = ({
   );
   if (message.type === "message" && message.emailTo)
     messageLabels.push(
-      <span key={`${message.id}-to`} className="flex items-center gap-1">
-        to: <span>{message.emailTo}</span>
+      <span key={`${message.id}-to`} className="flex items-center gap-1 whitespace-nowrap">
+        <span className="font-medium">To:</span> {message.emailTo}
       </span>,
     );
   if (message.type === "message" && message.cc.length > 0)
     messageLabels.push(
-      <span key={`${message.id}-cc`} className="flex items-center gap-1">
-        cc:{" "}
+      <span key={`${message.id}-cc`} className="flex items-center gap-1 whitespace-nowrap">
+        <span className="font-medium tracking-wide">CC:</span>
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span>{truncate(message.cc.join(", "), { length: 150 })}</span>
+              <span className="truncate max-w-[150px] md:max-w-[300px]">{message.cc.join(", ")}</span>
             </TooltipTrigger>
             {message.cc.join(", ").length > 150 ? (
               <TooltipContent>
@@ -141,12 +141,12 @@ const MessageItem = ({
     );
   if (message.type === "message" && message.bcc.length > 0)
     messageLabels.push(
-      <span key={`${message.id}-bcc`} className="flex items-center gap-1">
-        bcc:{" "}
+      <span key={`${message.id}-bcc`} className="flex items-center gap-1 whitespace-nowrap">
+        <span className="font-medium tracking-wide">BCC:</span>
         <TooltipProvider delayDuration={0}>
           <Tooltip>
             <TooltipTrigger asChild>
-              <span>{truncate(message.bcc.join(", "), { length: 150 })}</span>
+              <span className="truncate max-w-[150px] md:max-w-[300px]">{message.bcc.join(", ")}</span>
             </TooltipTrigger>
             {message.bcc.join(", ").length > 150 ? (
               <TooltipContent>

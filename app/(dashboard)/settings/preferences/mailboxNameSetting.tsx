@@ -4,12 +4,12 @@ import { useState } from "react";
 import { toast } from "sonner";
 import { useSavingIndicator } from "@/components/hooks/useSavingIndicator";
 import { SavingIndicator } from "@/components/savingIndicator";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useDebouncedCallback } from "@/components/useDebouncedCallback";
 import { useOnChange } from "@/components/useOnChange";
 import { RouterOutputs } from "@/trpc";
 import { api } from "@/trpc/react";
-import SectionWrapper from "../sectionWrapper";
 
 const MailboxNameSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"] }) => {
   const [name, setName] = useState(mailbox.name);
@@ -37,16 +37,25 @@ const MailboxNameSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["ge
   }, [name]);
 
   return (
-    <div className="relative">
-      <div className="absolute top-2 right-4 z-10">
-        <SavingIndicator state={savingIndicator.state} />
-      </div>
-      <SectionWrapper title="Mailbox name" description="Change the name of your mailbox">
-        <div className="max-w-sm">
-          <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Enter mailbox name" />
+    <Card>
+      <CardHeader className="relative">
+        <div className="absolute right-6 top-6">
+          <SavingIndicator state={savingIndicator.state} />
         </div>
-      </SectionWrapper>
-    </div>
+        <CardTitle>Mailbox Name</CardTitle>
+        <CardDescription>Change the display name of your mailbox</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className="max-w-sm">
+          <Input 
+            value={name} 
+            onChange={(e) => setName(e.target.value)} 
+            placeholder="Enter mailbox name"
+            className="h-10"
+          />
+        </div>
+      </CardContent>
+    </Card>
   );
 };
 

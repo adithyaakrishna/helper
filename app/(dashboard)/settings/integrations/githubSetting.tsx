@@ -1,3 +1,5 @@
+"use client";
+
 import { useRouter } from "next/navigation";
 import { parseAsStringEnum, useQueryState } from "nuqs";
 import { useEffect, useId, useState } from "react";
@@ -7,11 +9,11 @@ import { ConfirmationDialog } from "@/components/confirmationDialog";
 import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRunOnce } from "@/components/useRunOnce";
 import { captureExceptionAndLog } from "@/lib/shared/sentry";
 import { RouterOutputs } from "@/trpc";
 import { api } from "@/trpc/react";
-import SectionWrapper from "../sectionWrapper";
 
 const GitHubRepositories = ({
   id,
@@ -26,14 +28,8 @@ const GitHubRepositories = ({
   const [repositories, setRepositories] = useState<{ id: number; name: string; fullName: string; owner: string }[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const { mutate: update } = api.mailbox.update.useMutation({
-    onSuccess: () => {
-      utils.mailbox.get.invalidate();
-    },
-    onError: (error) => {
-      toast.error("Error updating GitHub settings", {
-        description: error.message,
-      });
-    },
+    onSuccess: () => utils.mailbox.get.invalidate(),
+    onError: (error) => toast.error("Error updating GitHub settings", { description: error.message }),
   });
 
   useRunOnce(() => {
@@ -49,11 +45,8 @@ const GitHubRepositories = ({
       }
     };
 
-    if (mailbox.githubConnected) {
-      fetchRepositories();
-    } else {
-      setIsLoading(false);
-    }
+    if (mailbox.githubConnected) fetchRepositories();
+    else setIsLoading(false);
   });
 
   const handleRepoChange = (fullName: string) => {
@@ -108,64 +101,68 @@ const GitHubSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"] }
     }
   };
 
-  const selectedRepoFullName =
-    mailbox.githubRepoOwner && mailbox.githubRepoName
-      ? `${mailbox.githubRepoOwner}/${mailbox.githubRepoName}`
-      : undefined;
+  const selectedRepoFullName = mailbox.githubRepoOwner && mailbox.githubRepoName
+    ? `${mailbox.githubRepoOwner}/${mailbox.githubRepoName}`
+    : undefined;
 
   const connectUrl = mailbox.githubConnectUrl;
   if (!connectUrl) return null;
 
   return (
-    <SectionWrapper title="GitHub Integration" description="Create and track GitHub issues from conversations.">
-      {isGitHubConnected ? (
-        <>
-          <div className="grid gap-1">
-            <Label htmlFor={repoUID}>Repository</Label>
-            <GitHubRepositories id={repoUID} selectedRepoFullName={selectedRepoFullName} mailbox={mailbox} />
-            <p className="mt-2 text-sm text-muted-foreground">
-              Select a single repository where issues will be created. Only one repository can be linked per mailbox.
-              {selectedRepoFullName && (
-                <>
-                  <br />
-                  <span className="font-medium">Important:</span> Make sure issues are enabled in your repository
-                  settings. <br />
-                  (scroll down to the "Features" section to see issues box)
-                </>
-              )}
-            </p>
-            {selectedRepoFullName && (
-              <div className="mt-2">
-                <a
-                  href={`https://github.com/${selectedRepoFullName}/settings`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-primary hover:underline"
-                >
-                  Check repository settings →
-                </a>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>GitHub Integration</CardTitle>
+          <CardDescription>Create and track GitHub issues from conversations</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isGitHubConnected ? (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor={repoUID} className="text-sm font-medium">Repository</Label>
+                  <div className="mt-2">
+                    <GitHubRepositories id={repoUID} selectedRepoFullName={selectedRepoFullName} mailbox={mailbox} />
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Select a single repository where issues will be created. Only one repository can be linked per mailbox.
+                  </p>
+                </div>
+
+                {selectedRepoFullName && (
+                  <div className="space-y-2 rounded-md bg-muted/50 p-4">
+                    <p className="text-sm">
+                      <span className="font-medium">Important:</span> Make sure issues are enabled in your repository settings.
+                    </p>
+                    <a
+                      href={`https://github.com/${selectedRepoFullName}/settings`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-sm text-primary hover:underline inline-flex items-center"
+                    >
+                      Check repository settings →
+                    </a>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-          <div className="mt-4">
-            <ConfirmationDialog
-              message="Are you sure you want to disconnect GitHub? This will remove the repository link and disable GitHub issue creation."
-              onConfirm={() => {
-                onDisconnectGitHub();
-              }}
-              confirmLabel="Yes, disconnect"
-            >
-              <Button variant="destructive_outlined">Disconnect from GitHub</Button>
-            </ConfirmationDialog>
-          </div>
-        </>
-      ) : (
-        <Button onClick={() => router.push(connectUrl)} variant="subtle">
-          <GitHubSvg className="mr-2 h-4 w-4" />
-          Connect to GitHub
-        </Button>
-      )}
-    </SectionWrapper>
+
+              <ConfirmationDialog
+                message="Are you sure you want to disconnect GitHub? This will remove the repository link and disable GitHub issue creation."
+                onConfirm={onDisconnectGitHub}
+                confirmLabel="Yes, disconnect"
+              >
+                <Button variant="destructive_outlined">Disconnect from GitHub</Button>
+              </ConfirmationDialog>
+            </div>
+          ) : (
+            <Button onClick={() => router.push(connectUrl)} variant="subtle" className="w-full sm:w-auto">
+              <GitHubSvg className="mr-2 h-4 w-4" />
+              Connect to GitHub
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

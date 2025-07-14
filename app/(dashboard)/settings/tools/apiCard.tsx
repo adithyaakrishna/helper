@@ -26,105 +26,110 @@ const ApiCard = ({ api: apiData }: { api: RouterOutputs["mailbox"]["tools"]["lis
       utils.mailbox.tools.list.invalidate();
       setIsSchemaPopoverOpen(false);
       setSchema("");
+      toast.success("API refreshed successfully");
     },
     onError: (error) => {
-      toast.error("Error refreshing API", { description: error.message });
+      toast.error("Failed to refresh API", { description: error.message });
     },
   });
 
   const { mutate: deleteApi, isPending: isDeleting } = api.mailbox.tools.deleteApi.useMutation({
     onSuccess: () => {
       utils.mailbox.tools.list.invalidate();
+      toast.success("API deleted successfully");
     },
     onError: (error) => {
-      toast.error("Error deleting API", { description: error.message });
+      toast.error("Failed to delete API", { description: error.message });
     },
   });
 
-  const handleSchemaSubmit = () => {
-    refreshApi({ apiId: apiData.id, schema });
-  };
-
-  const refreshButton = (ariaAttributes: React.AriaAttributes) => (
-    <Button variant="ghost" size="sm" disabled={isRefreshing} {...ariaAttributes}>
-      {isRefreshed ? (
-        <Check className="h-4 w-4 mr-2" />
-      ) : (
-        <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-      )}
-      {isRefreshed ? "Refreshed" : "Refresh"}
-    </Button>
-  );
-
   return (
     <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <div>
-            <CardTitle>{apiData.name}</CardTitle>
-            <div className="text-sm text-muted-foreground">{apiData.baseUrl ?? "OpenAPI schema"}</div>
-          </div>
-          <div className="flex gap-2">
-            {!apiData.baseUrl ? (
-              <Popover open={isSchemaPopoverOpen} onOpenChange={setIsSchemaPopoverOpen}>
-                <PopoverTrigger asChild>{refreshButton({})}</PopoverTrigger>
-                <PopoverContent className="min-w-[400px]">
-                  <div className="space-y-4">
-                    <div>
-                      <Label htmlFor="schema">Update OpenAPI Schema</Label>
-                      <Textarea
-                        id="schema"
-                        value={schema}
-                        onChange={(e) => setSchema(e.target.value)}
-                        onModEnter={handleSchemaSubmit}
-                        placeholder={`{
+      <CardHeader className="flex-row items-center justify-between space-y-0 pb-2">
+        <div className="space-y-1">
+          <CardTitle className="text-xl">{apiData.name}</CardTitle>
+          <p className="text-sm text-muted-foreground">{apiData.baseUrl ?? "OpenAPI schema"}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          {!apiData.baseUrl ? (
+            <Popover open={isSchemaPopoverOpen} onOpenChange={setIsSchemaPopoverOpen}>
+              <PopoverTrigger asChild>
+                <Button 
+                  variant="ghost" 
+                  size="sm"
+                  disabled={isRefreshing}
+                  className="flex items-center gap-2"
+                >
+                  {isRefreshed ? (
+                    <Check className="h-4 w-4" />
+                  ) : (
+                    <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+                  )}
+                  {isRefreshed ? "Updated" : "Update Schema"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-[400px] p-4">
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <Label>Update OpenAPI Schema</Label>
+                    <Textarea
+                      value={schema}
+                      onChange={(e) => setSchema(e.target.value)}
+                      placeholder={`{
   "products": {
     "GET": {
       "url": "/products/:id",
-      "description": "Retrieve the details of a product"
+      "description": "Retrieve product details"
     }
   }
 }`}
-                        rows={10}
-                        disabled={isRefreshing}
-                        className="mt-2"
-                      />
-                    </div>
-                    <div className="flex justify-end">
-                      <Button type="submit" disabled={isRefreshing} onClick={handleSchemaSubmit}>
-                        {isRefreshing ? "Updating..." : "Update Schema"}
-                      </Button>
-                    </div>
+                      rows={8}
+                      disabled={isRefreshing}
+                    />
                   </div>
-                </PopoverContent>
-              </Popover>
-            ) : (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => refreshApi({ apiId: apiData.id })}
-                disabled={isRefreshing}
-              >
-                {isRefreshed ? (
-                  <Check className="h-4 w-4 mr-2" />
-                ) : (
-                  <RefreshCw className={`h-4 w-4 mr-2 ${isRefreshing ? "animate-spin" : ""}`} />
-                )}
-                {isRefreshed ? "Refreshed" : "Refresh"}
-              </Button>
-            )}
-            <ConfirmationDialog
-              message="Are you sure you want to delete this API?"
-              onConfirm={() => {
-                deleteApi({ apiId: apiData.id });
-              }}
-              confirmLabel="Yes, delete"
+                  <div className="flex justify-end">
+                    <Button
+                      onClick={() => refreshApi({ apiId: apiData.id, schema })}
+                      disabled={isRefreshing}
+                    >
+                      {isRefreshing ? "Updating..." : "Update Schema"}
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          ) : (
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => refreshApi({ apiId: apiData.id })}
+              disabled={isRefreshing}
+              className="flex items-center gap-2"
             >
-              <Button variant="ghost" size="sm" iconOnly disabled={isDeleting}>
-                <Trash className="h-4 w-4" />
-              </Button>
-            </ConfirmationDialog>
-          </div>
+              {isRefreshed ? (
+                <Check className="h-4 w-4" />
+              ) : (
+                <RefreshCw className={`h-4 w-4 ${isRefreshing ? "animate-spin" : ""}`} />
+              )}
+              {isRefreshed ? "Updated" : "Update"}
+            </Button>
+          )}
+          
+          <ConfirmationDialog
+            message="Are you sure you want to delete this API? This action cannot be undone."
+            onConfirm={() => deleteApi({ apiId: apiData.id })}
+            confirmLabel="Yes, delete"
+          >
+            <Button
+              variant="ghost"
+              size="sm"
+              disabled={isDeleting}
+              className="text-muted-foreground hover:text-destructive"
+            >
+              <Trash className="h-4 w-4" />
+              <span className="sr-only">Delete API</span>
+            </Button>
+          </ConfirmationDialog>
         </div>
       </CardHeader>
       <CardContent>

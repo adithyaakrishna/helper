@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import { useEffect, useId, useState } from "react";
 import { toast } from "sonner";
@@ -7,12 +9,12 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useRunOnce } from "@/components/useRunOnce";
 import useShowToastForSlackConnectStatus from "@/components/useShowToastForSlackConnectStatus";
 import { captureExceptionAndLog } from "@/lib/shared/sentry";
 import { RouterOutputs } from "@/trpc";
 import { api } from "@/trpc/react";
-import SectionWrapper from "../sectionWrapper";
 
 export const SlackChannels = ({
   id,
@@ -109,12 +111,8 @@ const SlackSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"] })
   const channelUID = useId();
   const utils = api.useUtils();
   const { mutate: update } = api.mailbox.update.useMutation({
-    onSuccess: () => {
-      utils.mailbox.get.invalidate();
-    },
-    onError: (error) => {
-      toast.error("Error updating Slack settings", { description: error.message });
-    },
+    onSuccess: () => utils.mailbox.get.invalidate(),
+    onError: (error) => toast.error("Error updating Slack settings", { description: error.message }),
   });
   useShowToastForSlackConnectStatus();
 
@@ -133,60 +131,71 @@ const SlackSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"] })
   if (!connectUrl) return null;
 
   return (
-    <SectionWrapper title="Slack Integration" description="Notify your team and respond without leaving Slack.">
-      {isSlackConnected ? (
-        <>
-          <div className="grid gap-1">
-            <Label htmlFor={channelUID}>Alert channel</Label>
-            <SlackChannels
-              id={channelUID}
-              selectedChannelId={mailbox.slackAlertChannel ?? undefined}
-              mailbox={mailbox}
-              onChange={(slackAlertChannel) => update({ slackAlertChannel })}
-            />
-            <p className="mt-2 text-sm text-muted-foreground">
-              Daily reports and notifications will be sent to this channel.
-            </p>
-          </div>
-          <div className="flex items-center justify-between mt-4">
-            <div className="space-y-0.5">
-              <Label htmlFor="ticket-response-alerts-toggle">Ticket response time alerts</Label>
-              <p className="text-sm text-muted-foreground">
-                Notifications about tickets waiting over 24 hours without a response.
-              </p>
-            </div>
-            <Switch
-              id="ticket-response-alerts-toggle"
-              checked={!mailbox.preferences?.disableTicketResponseTimeAlerts}
-              onCheckedChange={(checked) =>
-                update({
-                  preferences: { disableTicketResponseTimeAlerts: !checked },
-                })
-              }
-            />
-          </div>
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>Slack Integration</CardTitle>
+          <CardDescription>Notify your team and respond without leaving Slack</CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {isSlackConnected ? (
+            <div className="space-y-6">
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor={channelUID} className="text-sm font-medium">Alert Channel</Label>
+                  <div className="mt-2">
+                    <SlackChannels
+                      id={channelUID}
+                      selectedChannelId={mailbox.slackAlertChannel ?? undefined}
+                      mailbox={mailbox}
+                      onChange={(slackAlertChannel) => update({ slackAlertChannel })}
+                    />
+                  </div>
+                  <p className="mt-2 text-sm text-muted-foreground">
+                    Daily reports and notifications will be sent to this channel
+                  </p>
+                </div>
 
-          <div className="mt-4">
-            <ConfirmationDialog
-              message="Are you sure you want to disconnect Slack?"
-              onConfirm={() => {
-                onDisconnectSlack();
-              }}
-              confirmLabel="Yes, disconnect"
-            >
-              <Button variant="destructive_outlined">Disconnect from Slack</Button>
-            </ConfirmationDialog>
-          </div>
-        </>
-      ) : (
-        <Button asChild variant="subtle">
-          <Link href={connectUrl}>
-            <SlackSvg className="mr-2 h-4 w-4" />
-            Add to Slack
-          </Link>
-        </Button>
-      )}
-    </SectionWrapper>
+                <div className="flex items-center justify-between rounded-lg border p-4">
+                  <div className="space-y-1">
+                    <Label htmlFor="ticket-response-alerts-toggle" className="text-sm font-medium">
+                      Ticket Response Time Alerts
+                    </Label>
+                    <p className="text-sm text-muted-foreground">
+                      Notifications about tickets waiting over 24 hours without a response
+                    </p>
+                  </div>
+                  <Switch
+                    id="ticket-response-alerts-toggle"
+                    checked={!mailbox.preferences?.disableTicketResponseTimeAlerts}
+                    onCheckedChange={(checked) =>
+                      update({
+                        preferences: { disableTicketResponseTimeAlerts: !checked },
+                      })
+                    }
+                  />
+                </div>
+              </div>
+
+              <ConfirmationDialog
+                message="Are you sure you want to disconnect Slack?"
+                onConfirm={onDisconnectSlack}
+                confirmLabel="Yes, disconnect"
+              >
+                <Button variant="destructive_outlined">Disconnect from Slack</Button>
+              </ConfirmationDialog>
+            </div>
+          ) : (
+            <Button asChild variant="subtle" className="w-full sm:w-auto">
+              <Link href={connectUrl}>
+                <SlackSvg className="mr-2 h-4 w-4" />
+                Add to Slack
+              </Link>
+            </Button>
+          )}
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

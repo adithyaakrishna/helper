@@ -63,13 +63,13 @@ export default function TabsPage() {
       id: "integrations",
       icon: Link,
       content: (
-        <>
+        <div className="space-y-4">
           <ToolSetting />
           <MetadataEndpointSetting metadataEndpoint={mailbox.metadataEndpoint} />
           <SlackSetting mailbox={mailbox} />
           <GitHubSetting mailbox={mailbox} />
           <ConnectSupportEmail />
-        </>
+        </div>
       ),
     },
     {

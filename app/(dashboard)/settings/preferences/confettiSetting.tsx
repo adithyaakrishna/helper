@@ -6,14 +6,16 @@ import { triggerConfetti } from "@/components/confetti";
 import { useSavingIndicator } from "@/components/hooks/useSavingIndicator";
 import { SavingIndicator } from "@/components/savingIndicator";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Switch } from "@/components/ui/switch";
 import { RouterOutputs } from "@/trpc";
 import { api } from "@/trpc/react";
-import { SwitchSectionWrapper } from "../sectionWrapper";
 
 const ConfettiSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"] }) => {
   const [confettiEnabled, setConfettiEnabled] = useState(mailbox.preferences?.confetti ?? false);
   const savingIndicator = useSavingIndicator();
   const utils = api.useUtils();
+  
   const { mutate: update } = api.mailbox.update.useMutation({
     onSuccess: () => {
       utils.mailbox.get.invalidate();
@@ -31,24 +33,32 @@ const ConfettiSetting = ({ mailbox }: { mailbox: RouterOutputs["mailbox"]["get"]
     update({ preferences: { confetti: checked } });
   };
 
-  const handleTestConfetti = () => {
-    triggerConfetti();
-  };
-
   return (
-    <div className="relative">
-      <div className="absolute top-2 right-4 z-10">
-        <SavingIndicator state={savingIndicator.state} />
-      </div>
-      <SwitchSectionWrapper
-        title="Confetti Settings"
-        description="Enable full-page confetti animation when closing a ticket"
-        initialSwitchChecked={confettiEnabled}
-        onSwitchChange={handleSwitchChange}
-      >
-        {confettiEnabled && <Button onClick={handleTestConfetti}>Test Confetti</Button>}
-      </SwitchSectionWrapper>
-    </div>
+    <Card>
+      <CardHeader className="relative">
+        <div className="absolute right-6 top-6">
+          <SavingIndicator state={savingIndicator.state} />
+        </div>
+        <div className="flex items-center justify-between">
+          <div>
+            <CardTitle>Celebration Effects</CardTitle>
+            <CardDescription>Show confetti animation when closing a ticket</CardDescription>
+          </div>
+          <Switch checked={confettiEnabled} onCheckedChange={handleSwitchChange} />
+        </div>
+      </CardHeader>
+      {confettiEnabled && (
+        <CardContent>
+          <Button 
+            variant="outlined" 
+            onClick={() => triggerConfetti()}
+            className="w-full sm:w-auto"
+          >
+            Test Celebration Effect
+          </Button>
+        </CardContent>
+      )}
+    </Card>
   );
 };
 

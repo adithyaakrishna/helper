@@ -1,6 +1,5 @@
 "use client";
 
-import cx from "classnames";
 import { ExternalLink, PlusCircle } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useRef, useState } from "react";
@@ -12,9 +11,9 @@ import { SecretInput } from "@/components/secretInput";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { captureExceptionAndLog } from "@/lib/shared/sentry";
 import { api } from "@/trpc/react";
-import SectionWrapper from "../sectionWrapper";
 
 type MetadataEndpointSettingProps = {
   metadataEndpoint: MetadataEndpoint | null;
@@ -22,80 +21,52 @@ type MetadataEndpointSettingProps = {
 
 const MetadataEndpointSetting = ({ metadataEndpoint }: MetadataEndpointSettingProps) => {
   const router = useRouter();
-
   const inputRef = useRef<HTMLInputElement>(null);
   const [newUrl, setNewUrl] = useState(metadataEndpoint?.url || "");
   const [isLoading, setIsLoading] = useState(false);
+  const [testRequestStatus, setTestRequestStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
 
-  const { mutateAsync: createEndpointMutation } = api.mailbox.metadataEndpoint.create.useMutation();
-  const { mutateAsync: deleteEndpointMutation } = api.mailbox.metadataEndpoint.delete.useMutation();
-  const { refetch: testEndpointQuery } = api.mailbox.metadataEndpoint.test.useQuery(undefined, { enabled: false });
+  const { mutateAsync: createEndpoint } = api.mailbox.metadataEndpoint.create.useMutation();
+  const { mutateAsync: deleteEndpoint } = api.mailbox.metadataEndpoint.delete.useMutation();
+  const { refetch: testEndpoint } = api.mailbox.metadataEndpoint.test.useQuery(undefined, { enabled: false });
 
-  const testRequestTexts = {
-    idle: "Send test request to URL",
-    loading: "Sending test request...",
-    success: "Sent!",
-    error: "Test request failed",
-  };
-  const [testRequestStatus, setTestRequestStatus] = useState<keyof typeof testRequestTexts>("idle");
-
-  const addEndpoint = async () => {
-    if (inputRef.current && !inputRef.current.checkValidity()) {
-      inputRef.current.reportValidity();
+  const handleAddEndpoint = async () => {
+    if (!newUrl || (inputRef.current && !inputRef.current.checkValidity())) {
+      inputRef.current?.reportValidity();
       return;
     }
-    if (!newUrl) return;
 
     setIsLoading(true);
     try {
-      const result = await createEndpointMutation({ url: newUrl });
+      const result = await createEndpoint({ url: newUrl });
       if (result?.error) {
         toast.error(result.error);
         return;
       }
       router.refresh();
-      toast.success("Metadata endpoint added!");
+      toast.success("Metadata endpoint added successfully");
     } catch (e) {
       captureExceptionAndLog(e);
-      toast.error("Error adding metadata endpoint");
+      toast.error("Failed to add metadata endpoint");
     } finally {
       setIsLoading(false);
     }
   };
 
-  const removeEndpoint = async () => {
-    setIsLoading(true);
-    try {
-      const result = await deleteEndpointMutation();
-      if (result?.error) {
-        toast.error(result.error);
-        return;
-      }
-      setNewUrl("");
-      router.refresh();
-      toast.success("Metadata endpoint removed!");
-    } catch (e) {
-      captureExceptionAndLog(e);
-      toast.error("Error removing metadata endpoint");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const sendTestRequest = async () => {
+  const handleTestRequest = async () => {
     setTestRequestStatus("loading");
     try {
-      const { data: result } = await testEndpointQuery();
+      const { data: result } = await testEndpoint();
       if (result?.error) {
         toast.error(result.error);
         setTestRequestStatus("error");
         return;
       }
-      toast.success("Test request succeeded!");
+      toast.success("Test request succeeded");
       setTestRequestStatus("success");
     } catch (e) {
       captureExceptionAndLog(e);
-      toast.error("Error sending test request");
+      toast.error("Test request failed");
       setTestRequestStatus("error");
     } finally {
       setTimeout(() => setTestRequestStatus("idle"), 3000);
@@ -103,92 +74,112 @@ const MetadataEndpointSetting = ({ metadataEndpoint }: MetadataEndpointSettingPr
   };
 
   return (
-    <SectionWrapper
-      title="Metadata Endpoint"
-      description={
-        <>
-          <span>Add an endpoint for Helper to fetch customer value and metadata when an email is received.</span>
-          <a
-            href={`${getMarketingSiteUrl()}/docs/tools/05-metadata-endpoint`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline flex items-center gap-1 mt-1"
-          >
-            Documentation
-            <ExternalLink className="h-4 w-4" />
-          </a>
-        </>
-      }
-    >
-      <div className="grid gap-3">
-        <div className="grid gap-1">
-          <Label>URL</Label>
-          <Input
-            ref={inputRef}
-            placeholder="Enter endpoint URL"
-            type="url"
-            onChange={(e) => setNewUrl(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === "Enter") {
-                e.preventDefault();
-                addEndpoint();
-              }
-            }}
-            value={newUrl}
-            disabled={!!metadataEndpoint?.url}
-            hint={
-              metadataEndpoint?.url ? (
-                <button
-                  className={cx(
-                    testRequestStatus === "idle" && "underline",
-                    testRequestStatus === "error"
-                      ? "text-destructive-500"
-                      : "text-muted-foreground hover:text-foreground",
-                  )}
-                  onClick={sendTestRequest}
-                  disabled={testRequestStatus !== "idle"}
-                >
-                  {testRequestTexts[testRequestStatus]}
-                </button>
-              ) : null
-            }
-          />
-        </div>
-        {metadataEndpoint?.url ? (
-          <>
-            <div className="grid gap-1">
-              <Label>HMAC Secret</Label>
-              <SecretInput value={metadataEndpoint.hmacSecret} ariaLabel="HMAC Secret" />
+    <div className="space-y-6">
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div className="space-y-1">
+              <CardTitle>Metadata Endpoint</CardTitle>
+              <CardDescription>
+                Add an endpoint for Helper to fetch customer value and metadata when an email is received
+              </CardDescription>
             </div>
-            <div>
-              <ConfirmationDialog
-                message="Are you sure you want to remove this Metadata Endpoint?"
-                onConfirm={removeEndpoint}
-                confirmLabel="Yes, remove"
-              >
-                <Button variant="destructive_outlined" disabled={isLoading}>
-                  Remove endpoint
-                </Button>
-              </ConfirmationDialog>
-            </div>
-          </>
-        ) : (
-          <div>
-            <Button
-              disabled={!newUrl || isLoading}
-              variant="subtle"
-              onClick={(e) => {
-                e.preventDefault();
-                addEndpoint();
-              }}
+            <a
+              href={`${getMarketingSiteUrl()}/docs/tools/05-metadata-endpoint`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-muted-foreground hover:text-primary flex items-center gap-1"
             >
-              <PlusCircle className="mr-2 h-4 w-4" />
-              Add endpoint
-            </Button>
+              Documentation
+              <ExternalLink className="h-4 w-4" />
+            </a>
           </div>
-        )}
-      </div>
-    </SectionWrapper>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="endpoint-url">Endpoint URL</Label>
+              <div className="mt-2">
+                <Input
+                  id="endpoint-url"
+                  ref={inputRef}
+                  placeholder="https://api.example.com/metadata"
+                  type="url"
+                  value={newUrl}
+                  onChange={(e) => setNewUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleAddEndpoint()}
+                  disabled={!!metadataEndpoint?.url || isLoading}
+                />
+              </div>
+              {metadataEndpoint?.url && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={handleTestRequest}
+                  disabled={testRequestStatus !== "idle"}
+                  className="mt-2"
+                >
+                  {testRequestStatus === "idle" && "Test endpoint"}
+                  {testRequestStatus === "loading" && "Testing..."}
+                  {testRequestStatus === "success" && "Test successful"}
+                  {testRequestStatus === "error" && "Test failed"}
+                </Button>
+              )}
+            </div>
+
+            {metadataEndpoint?.url && (
+              <div className="space-y-4">
+                <div>
+                  <Label htmlFor="hmac-secret">HMAC Secret</Label>
+                  <div className="mt-2">
+                    <SecretInput value={metadataEndpoint.hmacSecret} ariaLabel="HMAC Secret" />
+                  </div>
+                </div>
+
+                <ConfirmationDialog
+                  message="Are you sure you want to remove this metadata endpoint?"
+                  onConfirm={async () => {
+                    setIsLoading(true);
+                    try {
+                      const result = await deleteEndpoint();
+                      if (result?.error) {
+                        toast.error(result.error);
+                        return;
+                      }
+                      setNewUrl("");
+                      router.refresh();
+                      toast.success("Metadata endpoint removed successfully");
+                    } catch (e) {
+                      captureExceptionAndLog(e);
+                      toast.error("Failed to remove metadata endpoint");
+                    } finally {
+                      setIsLoading(false);
+                    }
+                  }}
+                  confirmLabel="Yes, remove"
+                >
+                  <Button variant="destructive_outlined" disabled={isLoading}>
+                    Remove endpoint
+                  </Button>
+                </ConfirmationDialog>
+              </div>
+            )}
+
+            {!metadataEndpoint?.url && (
+              <Button
+                variant="subtle"
+                onClick={handleAddEndpoint}
+                disabled={!newUrl || isLoading}
+                className="w-full sm:w-auto"
+              >
+                <PlusCircle className="mr-2 h-4 w-4" />
+                {isLoading ? "Adding endpoint..." : "Add endpoint"}
+              </Button>
+            )}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
   );
 };
 

@@ -228,7 +228,7 @@ const TeamMemberRow = ({ member, isAdmin }: TeamMemberRowProps) => {
           <span className="truncate">{member.email || "No email"}</span>
         </div>
       </TableCell>
-      <TableCell>
+      <TableCell className="w-[150px">
         {isAdmin || member.id === currentUser?.id ? (
           <Input
             value={displayNameInput}
@@ -258,7 +258,7 @@ const TeamMemberRow = ({ member, isAdmin }: TeamMemberRowProps) => {
       <TableCell>
         {isAdmin ? (
           <Select value={role} onValueChange={(value: UserRole) => handleRoleChange(value)}>
-            <SelectTrigger className="w-[180px]">
+            <SelectTrigger className="w-[120px]">
               <SelectValue placeholder="Role" />
             </SelectTrigger>
             <SelectContent>

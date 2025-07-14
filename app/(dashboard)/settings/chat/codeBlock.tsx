@@ -32,12 +32,12 @@ const theme = {
 
 const CodeBlock = ({ code, language }: { code: string; language: string }) => {
   return (
-    <div className="relative rounded-lg border border-border bg-background p-4 pr-10 text-xs">
+    <div className="relative rounded-xl border bg-muted/50 p-4 pr-12 text-sm font-mono shadow-sm">
       <Highlight code={code} language={language} theme={theme}>
         {({ className, style, tokens, getLineProps, getTokenProps }) => (
-          <pre className={`${className} code overflow-x-auto`} style={{ ...style }}>
+          <pre className={`${className} overflow-x-auto`} style={{ ...style }}>
             {tokens.map((line, i) => (
-              <div key={i} {...getLineProps({ line })}>
+              <div key={i} {...getLineProps({ line })} className="leading-relaxed">
                 {line.map((token, key) => (
                   <span key={key} {...getTokenProps({ token })} />
                 ))}

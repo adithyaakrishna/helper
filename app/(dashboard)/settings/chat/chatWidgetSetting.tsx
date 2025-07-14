@@ -19,7 +19,7 @@ import { useOnChange } from "@/components/useOnChange";
 import { mailboxes } from "@/db/schema";
 import { RouterOutputs } from "@/trpc";
 import { api } from "@/trpc/react";
-import SectionWrapper, { SwitchSectionWrapper } from "../sectionWrapper";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import CodeBlock from "./codeBlock";
 import WidgetHMACSecret from "./widgetHMACSecret";
 
@@ -273,23 +273,25 @@ ${NODE_HMAC_SAMPLE_CODE}
   `.trim();
 
   return (
-    <div className="space-y-6">
-      <SectionWrapper
-        className="max-w-3xl space-y-4"
-        title="Widget Installation"
-        description={
-          <a
-            href={`${getMarketingSiteUrl()}/docs/widget/01-overview`}
-            target="_blank"
-            rel="noopener noreferrer"
-            className="hover:underline flex items-center gap-1"
-          >
-            Documentation
-            <ExternalLink className="size-4" />
-          </a>
-        }
-      >
-        <Tabs defaultValue="vanilla" className="w-full">
+    <div className="space-y-4 mt-4">
+      <Card>
+        <CardHeader>
+          <CardTitle>Widget Installation</CardTitle>
+          <CardDescription className="flex items-center gap-2">
+            <span>Configure and customize your chat widget</span>
+            <a
+              href={`${getMarketingSiteUrl()}/docs/widget/01-overview`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-primary hover:underline flex items-center gap-1"
+            >
+              Documentation
+              <ExternalLink className="size-3" />
+            </a>
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <Tabs defaultValue="vanilla" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-4">
             <TabsTrigger value="vanilla">HTML/JavaScript</TabsTrigger>
             <TabsTrigger value="react">React/Next.js</TabsTrigger>
@@ -605,17 +607,20 @@ export default async function RootLayout({
             </Accordion>
           </TabsContent>
         </Tabs>
-      </SectionWrapper>
-      <div className="relative">
-        <div className="absolute top-2 right-4 z-10">
-          <SavingIndicator state={chatVisibilitySaving.state} />
-        </div>
-        <SwitchSectionWrapper
-          title="Chat Icon Visibility"
-          description="Choose when your customers can see the chat widget on your website or app"
-          initialSwitchChecked={mode !== "off"}
-          onSwitchChange={handleSwitchChange}
-        >
+        </CardContent>
+      </Card>
+
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Chat Icon Visibility</CardTitle>
+              <CardDescription>Control when customers can see the chat widget</CardDescription>
+            </div>
+            <SavingIndicator state={chatVisibilitySaving.state} />
+          </div>
+        </CardHeader>
+        <CardContent>
           {mode !== "off" && (
             <div className="space-y-4">
               <div className="flex flex-col space-y-2">
@@ -646,17 +651,20 @@ export default async function RootLayout({
               )}
             </div>
           )}
-        </SwitchSectionWrapper>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="relative">
-        <div className="absolute top-2 right-4 z-10">
-          <SavingIndicator state={hostUrlSaving.state} />
-        </div>
-        <SectionWrapper
-          title="Chat widget host URL"
-          description="The URL where your chat widget is installed. If set, customers will be able to continue email conversations in the chat widget."
-        >
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Widget Host URL</CardTitle>
+              <CardDescription>Enable email to chat conversation continuity</CardDescription>
+            </div>
+            <SavingIndicator state={hostUrlSaving.state} />
+          </div>
+        </CardHeader>
+        <CardContent>
           <div className="flex flex-col space-y-2">
             <Label htmlFor="widgetHost">Host URL</Label>
             <Input
@@ -668,17 +676,20 @@ export default async function RootLayout({
               className="max-w-[350px]"
             />
           </div>
-        </SectionWrapper>
-      </div>
+        </CardContent>
+      </Card>
 
-      <div className="relative">
-        <div className="absolute top-2 right-4 z-10">
-          <SavingIndicator state={emailResponseSaving.state} />
-        </div>
-        <SectionWrapper
-          title="Respond to email inquiries with chat"
-          description="Automatically respond to emails as if the customer was using the chat widget."
-        >
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <div>
+              <CardTitle>Email Response Settings</CardTitle>
+              <CardDescription>Configure automated email to chat responses</CardDescription>
+            </div>
+            <SavingIndicator state={emailResponseSaving.state} />
+          </div>
+        </CardHeader>
+        <CardContent>
           <div className="space-y-4">
             <Tabs value={autoRespond} onValueChange={(value) => setAutoRespond(value as "off" | "draft" | "reply")}>
               <TabsList className="grid w-full grid-cols-3">
@@ -688,11 +699,11 @@ export default async function RootLayout({
               </TabsList>
             </Tabs>
           </div>
-        </SectionWrapper>
-      </div>
+        </CardContent>
+      </Card>
 
       {showChatWidget && (
-        <div className="fixed bottom-8 right-24 bg-primary text-primary-foreground px-3 py-1.5 rounded-md">
+        <div className="fixed bottom-8 right-24 bg-primary text-primary-foreground px-4 py-2 rounded-lg shadow-lg">
           Try it out →
         </div>
       )}

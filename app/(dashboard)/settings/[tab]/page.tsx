@@ -46,10 +46,10 @@ export default function TabsPage() {
       id: "customers",
       icon: UserPlus,
       content: (
-        <>
+        <div className="space-y-4">
           <CustomerSetting mailbox={mailbox} />
           <AutoCloseSetting mailbox={mailbox} />
-        </>
+        </div>
       ),
     },
     {

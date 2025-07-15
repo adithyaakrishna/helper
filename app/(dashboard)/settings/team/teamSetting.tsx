@@ -2,14 +2,14 @@
 
 import { Search } from "lucide-react";
 import { useState } from "react";
-import LoadingSpinner from "@/components/loadingSpinner";
 import { Input } from "@/components/ui/input";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useSession } from "@/components/useSession";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { api } from "@/trpc/react";
 import { AddMember } from "./addMember";
-import TeamMemberRow, { ROLE_DISPLAY_NAMES } from "./teamMemberRow";
+import TeamMemberRow from "./teamMemberRow";
+import { TeamSettingLoadingSkeleton } from "./teamSettingLoadingSkeleton";
 
 const TeamSetting = () => {
   const { data, isLoading } = api.mailbox.members.list.useQuery();
@@ -35,7 +35,6 @@ const TeamSetting = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {user?.permissions === "admin" && <AddMember teamMembers={teamMembers} />}
-
           <div className="space-y-4">
             {teamMembers.length > 0 && (
               <div className="relative">
@@ -63,13 +62,7 @@ const TeamSetting = () => {
                 </TableHeader>
                 <TableBody>
                   {isLoading ? (
-                    <TableRow>
-                      <TableCell colSpan={7} className="h-32">
-                        <div className="flex justify-center">
-                          <LoadingSpinner size="md" />
-                        </div>
-                      </TableCell>
-                    </TableRow>
+                    <TeamSettingLoadingSkeleton />
                   ) : filteredTeamMembers.length === 0 ? (
                     <TableRow>
                       <TableCell colSpan={7} className="h-32">

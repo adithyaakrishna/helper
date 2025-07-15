@@ -165,10 +165,6 @@ export default function KnowledgeBankSetting() {
                     {!withSuggestedReplacement.length && !otherEntries.length && (
                       <div className="flex flex-col items-center justify-center gap-2 p-12 text-center">
                         <p className="text-sm text-muted-foreground">No knowledge entries found</p>
-                        <Button variant="outlined" onClick={() => setShowNewFaqForm(true)}>
-                          <PlusCircle className="mr-2 h-4 w-4" />
-                          Add your first entry
-                        </Button>
                       </div>
                     )}
                   </div>

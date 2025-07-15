@@ -86,6 +86,32 @@ const TeamSetting = () => {
           </div>
         </CardContent>
       </Card>
+      <Card>
+      <CardHeader>
+        <CardTitle>Support Team Assignment Rules</CardTitle>
+        <CardDescription>Understanding how tickets are assigned to team members</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <ul className="space-y-2 text-sm text-muted-foreground">
+          <li className="flex items-start gap-2">
+            <span className="font-medium text-foreground">Core Members:</span>
+            Assigned tickets in a round-robin style
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="font-medium text-foreground">Non-core Members:</span>
+            Only assigned tickets when tags match their keywords
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="font-medium text-foreground">Away Members:</span>
+            Do not receive any ticket assignments
+          </li>
+          <li className="flex items-start gap-2">
+            <span className="font-medium text-foreground">Weekly Reports:</span>
+            Only Core support team members are mentioned explicitly
+          </li>
+        </ul>
+      </CardContent>
+    </Card>
     </div>
   );
 };

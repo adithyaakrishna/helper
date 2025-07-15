@@ -60,6 +60,9 @@ export default function KnowledgeBankSetting() {
           <CardTitle>Knowledge Bank</CardTitle>
           <CardDescription>
             Record information that you frequently share with customers. Helper uses this to provide consistent and accurate responses.
+            <p className="mt-2">
+              Helper will suggest improvements to your knowledge bank to ensure it's up to date.
+            </p>
           </CardDescription>
         </CardHeader>
         <CardContent>

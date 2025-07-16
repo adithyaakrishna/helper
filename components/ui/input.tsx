@@ -1,39 +1,21 @@
-import * as React from "react";
-import { onModEnterKeyboardEvent } from "@/components/onModEnterKeyboardEvent";
-import { cn } from "@/lib/utils";
+import * as React from "react"
 
-export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  onModEnter?: () => void;
-  hint?: React.ReactNode;
-  iconsSuffix?: React.ReactNode;
-  iconsPrefix?: React.ReactNode;
-  ref?: React.Ref<HTMLInputElement>;
+import { cn } from "@/lib/utils"
+
+function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+  return (
+    <input
+      type={type}
+      data-slot="input"
+      className={cn(
+        "file:text-foreground placeholder:text-muted-foreground selection:bg-primary selection:text-primary-foreground dark:bg-input/30 border-input flex h-9 w-full min-w-0 rounded-md border bg-transparent px-3 py-1 text-base shadow-xs transition-[color,box-shadow] outline-none file:inline-flex file:h-7 file:border-0 file:bg-transparent file:text-sm file:font-medium disabled:pointer-events-none disabled:cursor-not-allowed disabled:opacity-50 md:text-sm",
+        "focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px]",
+        "aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive",
+        className
+      )}
+      {...props}
+    />
+  )
 }
 
-const Input = ({ className, type, onModEnter, iconsSuffix, iconsPrefix, hint, ref, ...props }: InputProps) => {
-  return (
-    <>
-      <div className="relative grow">
-        {iconsPrefix && <div className="absolute inset-y-0 left-0 flex items-center gap-2 pl-3">{iconsPrefix}</div>}
-        <input
-          type={type}
-          className={cn(
-            "w-full rounded-lg bg-background border border-border text-sm focus:border-transparent focus:outline-hidden focus:ring-muted-foreground disabled:cursor-not-allowed disabled:opacity-50",
-            "placeholder:text-muted-foreground",
-            "text-base",
-            iconsPrefix && "pl-10",
-            className,
-          )}
-          ref={ref}
-          onKeyDown={props.onKeyDown || (onModEnter ? onModEnterKeyboardEvent(onModEnter) : undefined)}
-          {...props}
-        />
-        {iconsSuffix && <div className="absolute inset-y-0 right-0 flex items-center gap-2 pr-3">{iconsSuffix}</div>}
-      </div>
-      {hint && <div className="mt-2 text-sm text-muted-foreground">{hint}</div>}
-    </>
-  );
-};
-Input.displayName = "Input";
-
-export { Input };
+export { Input }
